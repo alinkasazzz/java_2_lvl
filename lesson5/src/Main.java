@@ -7,7 +7,7 @@ public class Main {
             arr[i] = 1;
             System.out.println(arr[i]);
         }
-
+        System.out.println("fuck");
     }
     long a = System.currentTimeMillis();
 }
