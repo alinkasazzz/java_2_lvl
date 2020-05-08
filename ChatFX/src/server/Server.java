@@ -50,6 +50,16 @@ public class Server {
             c.send(nick + ": "+ msg);
         }
     }
+    public void privateMsg(ClientHandler sender, String receiver, String msg){
+        for (ClientHandler client : clients) {
+            if (client == receiver){
+                sender.send(msg);
+                clients.send(msg);
+                return;
+            }
+        }
+        sender.send("Получатель не найден" + receiver);
+    }
     public void subscribe(ClientHandler clientHandler){
         clients.add(clientHandler);
     }

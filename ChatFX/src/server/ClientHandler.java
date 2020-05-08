@@ -13,6 +13,12 @@ public class ClientHandler {
 
     private String nick;
     private String login;
+    private String sender;
+    private String receiver;
+
+    public String getNick(){
+        return nick;
+    }
 
     public ClientHandler(Socket client, Server server) {
 
@@ -53,12 +59,13 @@ public class ClientHandler {
                         }
                         if (str.startsWith("/w")){
                             String[] token = str.split(" ", 3);
-                            for (String s : ) {
-                                
+                            if(token.length ==3) {
+                                server.privateMsg(nick, token[1], token[2]);
                             }
-                            
                         }
-                       server.broadcastMsg(str, nick);
+                        else {
+                            server.broadcastMsg(str, nick);
+                        }
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
