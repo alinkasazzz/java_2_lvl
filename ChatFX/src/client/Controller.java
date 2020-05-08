@@ -74,7 +74,7 @@ public class Controller implements Initializable {
                 try {
                     while (true){
                         String str = in.readUTF();
-                        if (str.startsWith("/authok")){
+                        if (str.startsWith("/authok ")){
                             try {
                                 nickname = str.split(" ")[1];
                             }catch (ArrayIndexOutOfBoundsException e){

@@ -30,7 +30,7 @@ public class ClientHandler {
                             String[] token = str.split(" ");
                             String newNick = server.getAuthService().getNicknameByLoginAndPassword(token[1], token[2]);
                             if (newNick != null){
-                                send("/authok"+newNick);
+                                send("/authok "+newNick);
                                 nick = newNick;
                                 login = token[1];
                                 server.subscribe(this);
@@ -44,11 +44,19 @@ public class ClientHandler {
                         }
 
                     }
+
                     while (true) {
                         String str = in.readUTF();
                         if (str.equals("/end")) {
                             out.writeUTF("/end");
                             break;
+                        }
+                        if (str.startsWith("/w")){
+                            String[] token = str.split(" ", 3);
+                            for (String s : ) {
+                                
+                            }
+                            
                         }
                        server.broadcastMsg(str, nick);
                     }
