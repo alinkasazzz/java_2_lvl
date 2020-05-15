@@ -51,10 +51,11 @@ public class Server {
         }
     }
     public void privateMsg(ClientHandler sender, String receiver, String msg){
+        String message = String.format("[ %s ] private [ %s ]: %s", sender.getNick(), receiver, msg);
         for (ClientHandler client : clients) {
-            if (client == receiver){
-                sender.send(msg);
-                clients.send(msg);
+            if ( client.getNick().equals(receiver) ){
+                sender.send(message);
+                client.send(message);
                 return;
             }
         }
@@ -65,6 +66,15 @@ public class Server {
     }
     public void unsubscribe(ClientHandler clientHandler){
         clients.remove(clientHandler);
+    }
+
+    public boolean isLoginAuthorized(String login){
+        for (ClientHandler c : clients) {
+            if (c.getLogin().equals(login)){
+                return true;
+            }
+        }
+        return false;
     }
 }
 

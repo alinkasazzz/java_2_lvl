@@ -16,7 +16,11 @@ public class ClientHandler {
     private String sender;
     private String receiver;
 
-    public String getNick(){
+    public String getNick() {
+        return nick;
+    }
+
+    public String getLogin() {
         return nick;
     }
 
@@ -30,43 +34,48 @@ public class ClientHandler {
             out = new DataOutputStream(client.getOutputStream());
             new Thread(() -> {
                 try {
-                    while (true){
-                        String str = in.readUTF();
-                        if (str.startsWith("/auth ")){
-                            String[] token = str.split(" ");
-                            String newNick = server.getAuthService().getNicknameByLoginAndPassword(token[1], token[2]);
-                            if (newNick != null){
-                                send("/authok "+newNick);
-                                nick = newNick;
-                                login = token[1];
-                                server.subscribe(this);
-                                System.out.println("Клиент "+ nick +" прошел аутентификацию");
-                                break;
-                            }else {
-                                send("Неверный логин / пароль");
-                            }
-
-
-                        }
-
-                    }
-
                     while (true) {
                         String str = in.readUTF();
-                        if (str.equals("/end")) {
-                            out.writeUTF("/end");
-                            break;
-                        }
-                        if (str.startsWith("/w")){
-                            String[] token = str.split(" ", 3);
-                            if(token.length ==3) {
-                                server.privateMsg(nick, token[1], token[2]);
+                        if (str.startsWith("/auth ")) {
+                            String[] token = str.split(" ");
+                            String newNick = server.getAuthService().getNicknameByLoginAndPassword(token[1], token[2]);
+
+                            login = token[1];
+
+                            if (newNick != null) {
+                                if (!server.isLoginAuthorized(login)) {
+                                    send("/authok " + newNick);
+                                    nick = newNick;
+                                    server.subscribe(this);
+                                    System.out.println("Клиент " + nick + " прошел аутентификацию");
+                                    break;
+                                } else {
+                                    send("С этим логином уже авторизовались");
+                                }
+                            } else {
+                                send("Неверный логин / пароль");
                             }
                         }
-                        else {
-                            server.broadcastMsg(str, nick);
-                        }
                     }
+
+                        while (true) {
+                            String str = in.readUTF();
+                            if (str.startsWith("/")) {
+                                if (str.equals("/end")) {
+                                    out.writeUTF("/end");
+                                    break;
+                                }
+                                if (str.startsWith("/w")) {
+                                    String[] token = str.split(" ", 3);
+                                    if (token.length == 3) {
+                                        server.privateMsg(this, token[1], token[2]);
+                                    }
+                                }
+                            } else {
+                                server.broadcastMsg(str, nick);
+                            }
+                        }
+
                 } catch (IOException e) {
                     e.printStackTrace();
                 } finally {
@@ -84,7 +93,8 @@ public class ClientHandler {
             e.printStackTrace();
         }
     }
-    public void send(String msg){
+
+    public void send(String msg) {
         try {
             out.writeUTF(msg);
         } catch (IOException e) {
