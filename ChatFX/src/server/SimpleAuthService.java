@@ -24,15 +24,24 @@ public class SimpleAuthService implements AuthService {
         for (int i = 1; i <= 10; i++) {
             users.add(new UserData("login" + i, "pass" + i, "nick" + i));
         }
+
     }
 
     @Override
     public String getNicknameByLoginAndPassword(String login, String password) {
+
+        return null;
+    }
+
+    @Override
+    public boolean registration(String login, String password, String nickname) {
         for (UserData u : users) {
-            if(u.login.equals(login) && u.password.equals(password)){
-                return u.nickname;
+            if(u.login.equals(login) || u.nickname.equals(nickname)){
+                return false;
             }
         }
-        return null;
+        users.add(new UserData(login, password, nickname));
+
+        return true;
     }
 }

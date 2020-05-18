@@ -21,7 +21,7 @@ public class ClientHandler {
     }
 
     public String getLogin() {
-        return nick;
+        return login;
     }
 
     public ClientHandler(Socket client, Server server) {
@@ -36,27 +36,39 @@ public class ClientHandler {
                 try {
                     while (true) {
                         String str = in.readUTF();
-                        if (str.startsWith("/auth ")) {
+                        if (str.startsWith("/reg ")){
                             String[] token = str.split(" ");
-                            String newNick = server.getAuthService().getNicknameByLoginAndPassword(token[1], token[2]);
-
-                            login = token[1];
-
-                            if (newNick != null) {
-                                if (!server.isLoginAuthorized(login)) {
-                                    send("/authok " + newNick);
-                                    nick = newNick;
-                                    server.subscribe(this);
-                                    System.out.println("Клиент " + nick + " прошел аутентификацию");
-                                    break;
-                                } else {
-                                    send("С этим логином уже авторизовались");
-                                }
-                            } else {
-                                send("Неверный логин / пароль");
+                            boolean reg = server.getAuthService().registration(token[1], token[2], token[3]);
+                            if(reg){
+                                send("Регистрация прошла успешно");
+                            }else {
+                                send("Логин или ник уже занят");
                             }
                         }
-                    }
+                        if (str.equals("/end")) {
+                            throw new RuntimeException("Клиент отключился крестиком");
+                        }
+                            if (str.startsWith("/auth ")) {
+                                String[] token = str.split(" ");
+                                String newNick = server.getAuthService().getNicknameByLoginAndPassword(token[1], token[2]);
+
+                                login = token[1];
+
+                                if (newNick != null) {
+                                    if (!server.isLoginAuthorized(login)) {
+                                        send("/authok " + newNick);
+                                        nick = newNick;
+                                        server.subscribe(this);
+                                        System.out.println("Клиент " + nick + " прошел аутентификацию");
+                                        break;
+                                    } else {
+                                        send("С этим логином уже авторизовались");
+                                    }
+                                } else {
+                                    send("Неверный логин / пароль");
+                                }
+                            }
+                        }
 
                         while (true) {
                             String str = in.readUTF();
@@ -75,7 +87,8 @@ public class ClientHandler {
                                 server.broadcastMsg(str, nick);
                             }
                         }
-
+                } catch(RuntimeException e){
+                    System.out.println(e.getMessage());
                 } catch (IOException e) {
                     e.printStackTrace();
                 } finally {
@@ -87,13 +100,14 @@ public class ClientHandler {
                         e.printStackTrace();
                     }
                 }
+
             }).start();
 
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
 
+        }
     public void send(String msg) {
         try {
             out.writeUTF(msg);
@@ -101,5 +115,6 @@ public class ClientHandler {
             e.printStackTrace();
         }
     }
-}
+    }
+
 

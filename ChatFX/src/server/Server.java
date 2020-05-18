@@ -1,4 +1,5 @@
 package server;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -7,12 +8,13 @@ import java.util.Vector;
 public class Server {
 
     private Vector<ClientHandler> clients;
-    private  AuthService authService;
-    public AuthService getAuthService(){
+    private AuthService authService;
+
+    public AuthService getAuthService() {
         return authService;
     }
 
-    public Server(){
+    public Server() {
         clients = new Vector<>();
         authService = new SimpleAuthService();
         Socket client = null;
@@ -23,7 +25,7 @@ public class Server {
             server = new ServerSocket(PORT);
             System.out.println("Сервер запущен");
 
-            while (true){
+            while (true) {
                 client = server.accept();
                 System.out.println("Клиент подключен");
 
@@ -45,15 +47,16 @@ public class Server {
         }
     }
 
-    public void broadcastMsg(String msg, String nick){
-        for (ClientHandler c : clients) {
-            c.send(nick + ": "+ msg);
-        }
-    }
-    public void privateMsg(ClientHandler sender, String receiver, String msg){
+
+    public void privateMsg(ClientHandler sender, String receiver, String msg) {
         String message = String.format("[ %s ] private [ %s ]: %s", sender.getNick(), receiver, msg);
+        if (sender.getNick().equals(receiver)){
+            sender.send(msg);
+            return;
+        }
+
         for (ClientHandler client : clients) {
-            if ( client.getNick().equals(receiver) ){
+            if (client.getNick().equals(receiver)) {
                 sender.send(message);
                 client.send(message);
                 return;
@@ -61,20 +64,41 @@ public class Server {
         }
         sender.send("Получатель не найден" + receiver);
     }
-    public void subscribe(ClientHandler clientHandler){
+
+    public void subscribe(ClientHandler clientHandler) {
         clients.add(clientHandler);
-    }
-    public void unsubscribe(ClientHandler clientHandler){
-        clients.remove(clientHandler);
+        broadcastClientList();
     }
 
-    public boolean isLoginAuthorized(String login){
+    public void unsubscribe(ClientHandler clientHandler) {
+        clients.remove(clientHandler);
+        broadcastClientList();
+    }
+
+    public boolean isLoginAuthorized(String login) {
         for (ClientHandler c : clients) {
-            if (c.getLogin().equals(login)){
+            if (c.getLogin().equals(login)) {
                 return true;
             }
         }
         return false;
+    }
+
+    public void broadcastMsg(String msg, String nick) {
+        for (ClientHandler c : clients) {
+            c.send(nick + ": " + msg);
+        }
+    }
+
+    public void broadcastClientList() {
+        StringBuilder sb = new StringBuilder("/clientlist ");
+        for (ClientHandler c : clients) {
+            sb.append(c.getNick() + " ");
+        }
+        String msg = sb.toString();
+        for (ClientHandler client : clients) {
+            client.send(msg);
+        }
     }
 }
 

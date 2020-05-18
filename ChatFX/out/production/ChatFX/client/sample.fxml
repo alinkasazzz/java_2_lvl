@@ -6,17 +6,25 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.ListView?>
 <VBox fx:controller="client.Controller"
-      xmlns:fx="http://javafx.com/fxml" alignment="center">
+      xmlns:fx="http://javafx.com/fxml" >
     <HBox fx:id="authPanel" managed="true">
         <TextField fx:id="loginField" HBox.hgrow="ALWAYS" promptText="login"/>
         <PasswordField fx:id="passwordField" HBox.hgrow="ALWAYS" promptText="password" onAction="#tryToAuth"/>
         <Button onAction="#tryToAuth" minWidth="80" text="Зайти"/>
     </HBox>
-    <TextArea fx:id="textArea" VBox.vgrow="ALWAYS" editable="false" />
 
+    <HBox VBox.vgrow="ALWAYS">
+        <TextArea fx:id="textArea" VBox.vgrow="ALWAYS" editable="false" />
+        <ListView fx:id="clientList" managed="false" visible="false"  minWidth="50"
+        onMouseClicked="#clickClientList"/>
+    </HBox>
     <HBox fx:id="msgPanel" visible="false" managed="false">
         <TextField fx:id="textField" HBox.hgrow="ALWAYS" onAction="#enter"/>
         <Button  onAction="#send"  text="Отправить"/>
+    </HBox>
+    <HBox  alignment="center">
+        <Button onAction="#tryToReg"   text="Регистрация"/>
     </HBox>
 </VBox>
